@@ -65,45 +65,58 @@ app.get('/compare-product', async (req, res) => {
     // Navigate to Flipkart product page
     await page.goto(flipkartUrl, { waitUntil: 'domcontentloaded' });
 
-    // Extract product details
+    // Extract Flipkart product details 
     await page.waitForSelector('._6EBuvT');
     const extractedText = await page.$eval('._6EBuvT', el => el.innerText.trim());
     console.log("extracted flipkart text", extractedText);
     const extractedPrice = await page.$eval('.Nx9bqj.CxhGGd', el => el.innerText.trim() || null);
     console.log("extracted flipkart price", extractedPrice);
+    const extractedImage = await page.$eval('.DByuf4.IZexXJ.jLEJ7H', el => el.getAttribute('src'));
+    console.log("extracted flipkart image", extractedImage);
 
     // Construct Amazon search URL
     const amazonUrl = `https://www.amazon.in/s?k=${encodeURIComponent(extractedText)}`;
     console.log("Searching Amazon:", amazonUrl);
     await page.goto(amazonUrl, { waitUntil: 'domcontentloaded' });
 
-    // Extract first Amazon product details
-    const results = await page.evaluate(() => {
-        const items = [];
-        const priceElement = document.querySelector('.a-offscreen');
-        const ratingElement = document.querySelector('.a-icon-alt');
-        const linkElement = document.querySelector('.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal');
+    // Extract Amazon product details 
+    await page.waitForSelector('.s-image');
 
-        if (priceElement && ratingElement && linkElement) {
-            items.push({
-                price: priceElement.innerText || "No price available",
-                rating: ratingElement.innerText.slice(0, 3) || "No rating available",
-                link: linkElement.href.startsWith('http') ? linkElement.href : `https://www.amazon.in${linkElement.getAttribute('href')}`,
-            });
-        }
+    // Extract price 
+    const amazonPrice = await page.$eval('.a-offscreen', el => el.innerText.trim()).catch(() => null);
+    console.log("Extracted Amazon price:", amazonPrice);
 
-        return items;
-    });
+    // Extract rating 
+    const amazonRating = await page.$eval('.a-icon-alt', el => el.innerText.slice(0, 3)).catch(() => null);
+    console.log("Extracted Amazon rating:", amazonRating);
 
-    // Prepare final response
+    // Extract link 
+    const amazonLink = await page.$eval('.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal', el => 
+      el.href.startsWith('http') ? el.href : `https://www.amazon.in${el.getAttribute('href')}`
+    ).catch(() => null);
+    console.log("Extracted Amazon link:", amazonLink);
+
+    // Extract image 
+    const amazonImage = await page.$eval('.s-image', el => 
+      el.getAttribute('src')
+    ).catch(() => null);
+    console.log("Extracted Amazon image:", amazonImage);
+
+    // Prepare response data
     const responseData = {
-      results: results.map((result, index) => ({
-        ...result,
-        extractedPrice,
-      }))
+      flipkart: {
+        text: extractedText,
+        price: extractedPrice,
+        image: extractedImage
+      },
+      amazon: {
+        price: amazonPrice,
+        rating: amazonRating,
+        link: amazonLink,
+        image: amazonImage
+      }
     };
-
-    console.log("the result is",responseData);
+    console.log("Response Data:", responseData);
 
     res.json(responseData);
   } catch (error) {
