@@ -117,6 +117,7 @@ app.get('/compare-flipkart-product', async (req, res) => {
 
     // Prepare response data
     const responseData = {
+      website: "flipkart",
       flipkartData: {
         text: extractedText,
         price: extractedPrice,
@@ -188,20 +189,22 @@ app.get('/compare-amazon-product', async (req, res) => {
     console.log("Extracted Flipkart rating:", flipkartRating);
 
     // Extract link 
-    const flipkartLink = await page.$eval('.rPDeLR', el => 
+    const flipkartLink = await page.$eval('.CGtC98', el => 
       el.href.startsWith('http') ? el.href : `https://www.flipkart.com${el.getAttribute('href')}`
     ).catch(() => null);
     console.log("Extracted Flipkart link:", flipkartLink);
 
     // Prepare response data
     const responseData = {
+      website: "amazon",
       flipkartData: {
         price: flipkartPrice,
         rating: flipkartRating,
-        link: flipkartLink
+        link: flipkartUrl
       },
       amazonData: {
-        price: extractedPrice,
+        text: extractedText,
+        price: extractedPrice
       }
     };
     console.log("Response Data:", responseData);
