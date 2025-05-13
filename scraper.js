@@ -1,5 +1,6 @@
 // scraper.js
 
+// Function To Scrap FlipKart Product
 export const scrapFlipkartProduct = async (page, flipkartUrl) => {
     await page.setRequestInterception(true);
     page.on('request', req => {
@@ -33,7 +34,8 @@ export const scrapFlipkartProduct = async (page, flipkartUrl) => {
       }
     };
 };
-  
+
+// Function to Scrap Amazon Product
 export const scrapAmazonProduct = async (page, amazonUrl) => {
     await page.setRequestInterception(true);
     page.on('request', req => {

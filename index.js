@@ -6,6 +6,8 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import puppeteer from 'puppeteer';
+
+// Custom Methods to Scrape Websites
 import { scrapFlipkartProduct, scrapAmazonProduct } from './scraper.js';
 
 const app = express();
