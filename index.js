@@ -44,7 +44,8 @@ app.get('/compare-flipkart-product', async (req, res) => {
 
   const page = await browser.newPage();
   try {
-    const data = await scrapFlipkartProduct(page, flipkartUrl);
+    const data = await scrapAmazonProduct(page, flipkartUrl);
+    console.log("the flipkart data is", data);
     res.json(data);
   } catch (error) {
     console.error('Error:', error);
@@ -62,7 +63,8 @@ app.get('/compare-amazon-product', async (req, res) => {
 
   const page = await browser.newPage();
   try {
-    const data = await scrapAmazonProduct(page, amazonUrl);
+    const data = await scrapFlipkartProduct(page, amazonUrl);
+    console.log("the amazon data is", data);
     res.json(data);
   } catch (error) {
     console.error('Error:', error);

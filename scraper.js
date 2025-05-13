@@ -1,7 +1,7 @@
 // scraper.js
 
 // Function To Scrap FlipKart Product
-export const scrapFlipkartProduct = async (page, flipkartUrl) => {
+export const scrapAmazonProduct = async (page, flipkartUrl) => {
     await page.setRequestInterception(true);
     page.on('request', req => {
       if (['stylesheet', 'font', 'image'].includes(req.resourceType())) req.abort();
@@ -36,7 +36,7 @@ export const scrapFlipkartProduct = async (page, flipkartUrl) => {
 };
 
 // Function to Scrap Amazon Product
-export const scrapAmazonProduct = async (page, amazonUrl) => {
+export const scrapFlipkartProduct = async (page, amazonUrl) => {
     await page.setRequestInterception(true);
     page.on('request', req => {
       if (['stylesheet', 'font', 'image'].includes(req.resourceType())) req.abort();
@@ -46,14 +46,30 @@ export const scrapAmazonProduct = async (page, amazonUrl) => {
     await page.goto(amazonUrl, { waitUntil: 'domcontentloaded' });
   
     const extractedText = await page.$eval('#productTitle', el => el.innerText.trim());
+    console.log("the extracted text from amazon is: ", extractedText);
     const extractedPrice = await page.$eval('.a-price-whole', el => el.innerText.trim());
+    console.log("the extracted price from amazon is: ", extractedPrice);
   
     const flipkartSearchURL = `https://www.flipkart.com/search?q=${encodeURIComponent(extractedText)}`;
+    console.log("the flipkart link we have gone to: ", flipkartSearchURL);
     await page.goto(flipkartSearchURL, { waitUntil: 'domcontentloaded' });
   
     const flipkartPrice = await page.$eval('.Nx9bqj', el => el.innerText.trim()).catch(() => null);
+    console.log("the scraped flipkart price: ", flipkartPrice);
     const flipkartRating = await page.$eval('.XQDdHH', el => el.innerText).catch(() => null);
-    const flipkartLink = await page.$eval('.CGtC98', el => el.href.startsWith('http') ? el.href : `https://www.flipkart.com${el.getAttribute('href')}`).catch(() => null);
+    console.log("the scraped flipkart rating: ", flipkartRating);
+    const selectors = ['.VJA3rP', '.CGtC98', '.rPDeLR'];
+    let flipkartLink = null;
+
+    for (const selector of selectors) {
+      flipkartLink = await page.$eval(selector, el => {
+        const href = el.getAttribute('href');
+        return href.startsWith('http') ? href : `https://www.flipkart.com${href}`;
+      }).catch(() => null);
+
+      if (flipkartLink) break; // Exit loop if found
+    }
+
   
     return {
       website: "amazon",
